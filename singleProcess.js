@@ -1,24 +1,4 @@
-var MobileEditorialTimelineGateway = function(){
-	var timeLines = {};
-
-	this.newTimeLine = function(newTimeLineEvent){
-		eventPayload = newTimeLineEvent['payload'];
-		timeLines[eventPayload['tv-content-id']] = mapToMobileTimeline(eventPayload);
-		return this;
-	};
-
-	function mapToMobileTimeline(eventPayload){
-		return {
-			'm-start' : eventPayload['start'],
-			'm-end' : eventPayload['end'],
-			'm-experience' : eventPayload['experience']
-		}
-	}
-
-	this.get = function(tvContentId) {
-		return timeLines[tvContentId];
-	};	
-};
+var unirest = require('unirest');
 
 var Event = {
 	create : function(stream, payload){
@@ -30,7 +10,7 @@ var Event = {
 	}
 };
 
-var EditorialTimeline = function(mobileEditorialTimelineGateway){
+var EditorialTimeline = function(){
 	var experiences = {};
 
 	this.newSchedule = function(newScheduleEvent){
@@ -41,7 +21,14 @@ var EditorialTimeline = function(mobileEditorialTimelineGateway){
 				'end' : payload['programme-end'],
 				'experience' : getExperience(payload['on-air-id'])
 		});
-		mobileEditorialTimelineGateway.newTimeLine(newTimeLineEvent);
+
+		unirest
+			.post('http://localhost:8080/newTimeLine')
+			.headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
+			.send(newTimeLineEvent)
+			.end(function (response) {
+			  console.log(response.body);
+			});
 		return this;
 	};
 
@@ -60,8 +47,7 @@ var EditorialTimeline = function(mobileEditorialTimelineGateway){
 	};
 };
 
-var mobileEditorialTimeline = new MobileEditorialTimelineGateway();
-var editorialTimeline = new EditorialTimeline(mobileEditorialTimeline);
+var editorialTimeline = new EditorialTimeline();
 
 newExperienceEvent = Event.create('newExperience', {
 	'on-air-id' : '123',
@@ -87,12 +73,4 @@ newScheduleEvent2 = Event.create('newSchedule', {
 editorialTimeline
 	.newSchedule(newScheduleEvent)
 	.newSchedule(newScheduleEvent2);
-
-
-
-
-console.log(mobileEditorialTimeline.get('xyz'));
-console.log(mobileEditorialTimeline.get('abc'));
-console.log(mobileEditorialTimeline.get('iain'));
-
 
