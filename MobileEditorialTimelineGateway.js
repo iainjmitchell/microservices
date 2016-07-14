@@ -18,7 +18,14 @@ var MobileEditorialTimelineGateway = function(){
 	}
 
 	this.get = function(tvContentId) {
-		return timelinesViewStore[tvContentId];
+		if (!!timelinesViewStore[tvContentId]){
+			return timelinesViewStore[tvContentId];
+		}
+		else {
+			return {
+				'm-experience' : 'NOTHING :('
+			}
+		}
 	};	
 };
 
@@ -32,7 +39,6 @@ server.get('/mobiletimelines/:contentId', function(request, response){
 });
 
 server.post('/newTimeLine', function(request, response){
-	console.log(request.body);
 	mobileEditorialTimeline.newTimeLine(request.body);
 	response.send(200);
 })

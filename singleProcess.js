@@ -1,60 +1,15 @@
 var unirest = require('unirest');
+var Event = require('./Event');
 
-var Event = {
-	create : function(stream, payload){
-		return {
-			'stream' : stream,
-			'timestamp' : Date.now,
-			'payload' : payload
-		};
-	}
-};
+var EDITORIAL_TIMELINE_URL = 'http://localhost:9090'
 
-var EditorialTimeline = function(){
-	var experiences = {};
-
-	this.newSchedule = function(newScheduleEvent){
-		var payload = newScheduleEvent['payload'];
-		var newTimeLineEvent = Event.create('newTimeline', {
-				'tv-content-id' : payload['content-id'],
-				'start' : payload['programme-start'],
-				'end' : payload['programme-end'],
-				'experience' : getExperience(payload['on-air-id'])
-		});
-
-		unirest
-			.post('http://localhost:8080/newTimeLine')
-			.headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
-			.send(newTimeLineEvent)
-			.end(function (response) {
-			  console.log(response.body);
-			});
-		return this;
-	};
-
-	function getExperience(onAirId){
-		if (!!experiences[onAirId]){
-			return experiences[onAirId];
-		}
-		else {
-			return 'NOTHING :(';
-		}
-	}
-
-	this.newExperience = function(newExperienceEvent){
-		var payload = newExperienceEvent['payload'];
-		experiences[payload['on-air-id']] = payload['experienceUrl'];
-	};
-};
-
-var editorialTimeline = new EditorialTimeline();
 
 newExperienceEvent = Event.create('newExperience', {
 	'on-air-id' : '123',
 	'experienceUrl': 'http://badger.com/face.img'
 });
 
-editorialTimeline.newExperience(newExperienceEvent);
+sendEvent(EDITORIAL_TIMELINE_URL+'/newExperience', newExperienceEvent);
 
 
 newScheduleEvent = Event.create('newSchedule', {
@@ -70,7 +25,16 @@ newScheduleEvent2 = Event.create('newSchedule', {
 	'programme-start' : '0',
 	'programme-end' : '2000',
 });
-editorialTimeline
-	.newSchedule(newScheduleEvent)
-	.newSchedule(newScheduleEvent2);
 
+sendEvent(EDITORIAL_TIMELINE_URL+'/newSchedule', newScheduleEvent);
+sendEvent(EDITORIAL_TIMELINE_URL+'/newSchedule', newScheduleEvent2);
+
+function sendEvent(url, event){
+	unirest
+		.post(url)
+		.headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
+		.send(event)
+		.end(function (response) {
+			 console.log(response.body);
+		});
+}
