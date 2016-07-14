@@ -1,4 +1,5 @@
 var restify = require('restify');
+var Queue = require('./Queue');
 
 var MobileEditorialTimelineGateway = function(){
 	var timelinesViewStore = {};
@@ -29,7 +30,12 @@ var MobileEditorialTimelineGateway = function(){
 	};	
 };
 
+
 var mobileEditorialTimeline = new MobileEditorialTimelineGateway();
+
+Queue.subscribe('newTimeline', function(event){
+	mobileEditorialTimeline.newTimeLine(event);
+});
 
 var server = restify.createServer();
 server.use(restify.bodyParser({ mapParams: false }));
@@ -37,11 +43,6 @@ server.use(restify.bodyParser({ mapParams: false }));
 server.get('/mobiletimelines/:contentId', function(request, response){
 	response.send(mobileEditorialTimeline.get(request.params.contentId));
 });
-
-server.post('/newTimeLine', function(request, response){
-	mobileEditorialTimeline.newTimeLine(request.body);
-	response.send(200);
-})
 
 server.listen(8080, function() {
   console.log('%s listening at %s', server.name, server.url);

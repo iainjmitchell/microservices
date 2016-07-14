@@ -1,6 +1,7 @@
 var restify = require('restify');
 var unirest = require('unirest');
 var Event = require('./Event');
+var Queue = require('./Queue');
 
 var EditorialTimeline = function(){
 	var experiences = {};
@@ -12,15 +13,9 @@ var EditorialTimeline = function(){
 				'start' : payload['programme-start'],
 				'end' : payload['programme-end'],
 				'experience' : getExperience(payload['on-air-id'])
-		});
+		}, newScheduleEvent['id'], 'EditorialTimeline');
 
-		unirest
-			.post('http://localhost:8080/newTimeLine')
-			.headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
-			.send(newTimeLineEvent)
-			.end(function (response) {
-			  console.log(response.body);
-			});
+		Queue.send('newTimeline', newTimeLineEvent);
 		return this;
 	};
 
