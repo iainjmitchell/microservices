@@ -29,7 +29,6 @@ var Queue = function(){
 		amqp_callback.connect(QUEUE_ADDRESS, function(err, connection) {
 			connection.createChannel(function(err, channel) {
 		    	channel.assertExchange(streamName, 'fanout', {durable: false});
-		    	console.log('yep');
 		    	channel.assertQueue('', {exclusive: true}, function(err, q) {
 		    		console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q.queue);
 		      		channel.bindQueue(q.queue, streamName, '');

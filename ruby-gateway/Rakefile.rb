@@ -10,9 +10,7 @@
 task :run_tests do 
 	sh "node ../MobileEditorialTimelineGateway.js &"
 	begin
-		sleep 1
 		sh "ruby ./tests/MobileTest.rb"
-		sleep 5
 	ensure
 		sh "kill $(ps aux | grep 'node ../MobileEditorialTimelineGateway.js' | grep -v grep | awk '{print $2}')"
 	end

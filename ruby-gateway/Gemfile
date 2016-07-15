@@ -2,3 +2,4 @@ source 'https://rubygems.org'
 gem 'sinatra'
 gem "bunny", "2.3.1"
 gem "test-unit"
+gem 'rest-client'
